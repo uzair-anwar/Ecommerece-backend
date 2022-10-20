@@ -36,7 +36,6 @@ export class ProductsController {
 
   @Get('all')
   async findAll() {
-    console.log('hello');
     return await this.productsService.findAll();
   }
 

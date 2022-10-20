@@ -28,6 +28,7 @@ export class PaymentsService {
           cvc: data.cvc,
         },
       });
+
       return { status: 200, result };
     } catch (error) {
       return { status: 400, message: error };

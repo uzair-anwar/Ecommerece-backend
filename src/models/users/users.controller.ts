@@ -24,7 +24,6 @@ export class UserController {
     @Body() data: createUserdto,
   ): Promise<any> {
     const result = await this.userService.addUser(data, file);
-    console.log(result);
     return result;
   }
 

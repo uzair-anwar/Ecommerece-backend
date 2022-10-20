@@ -11,6 +11,7 @@ export class OrdersService {
     @InjectModel('Order') private readonly orderModel: Model<Order>,
     private readonly paymentsService: PaymentsService,
   ) {}
+
   async create(data: CreateOrderDto, id: string) {
     try {
       const result = await this.paymentsService.charge(
@@ -18,11 +19,13 @@ export class OrdersService {
         data.paymentMethodId,
         data.stripeId,
       );
+
       const items = [];
       if (result.id) {
         for (const { _id } of data.items) {
           items.push(_id);
         }
+
         const newOrder = new this.orderModel({
           price: data.price,
           items,
@@ -30,6 +33,7 @@ export class OrdersService {
           paymentId: result.id,
           cardNo: data.cardNo,
         });
+
         const res = await newOrder.save();
         if (res) {
           return {
@@ -67,15 +71,10 @@ export class OrdersService {
     try {
       return await this.orderModel.find({ userId: id });
     } catch (error) {
-      return error;
+      return {
+        status: 200,
+        message: error,
+      };
     }
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} order`;
   }
 }

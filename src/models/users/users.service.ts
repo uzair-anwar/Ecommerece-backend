@@ -64,7 +64,6 @@ export class UserService {
   async login(data: any) {
     try {
       const result = await this.userModel.findOne({ email: data.email }).exec();
-      console.log(result);
       if (result != null) {
         const isMatch = await comparePassword(
           data.password,

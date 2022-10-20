@@ -9,6 +9,7 @@ export class CoupansService {
   constructor(
     @InjectModel('Coupan') private readonly coupanModel: Model<Coupan>,
   ) {}
+
   async create(data: CreateCoupanDto) {
     try {
       const newCoupan = new this.coupanModel({
@@ -16,8 +17,8 @@ export class CoupansService {
         discount: data.discount,
         expireDate: data.expireDate,
       });
-      const result = await newCoupan.save();
-      return result;
+
+      return await newCoupan.save();
     } catch (error) {
       return {
         status: 400,
@@ -27,6 +28,13 @@ export class CoupansService {
   }
 
   async findOne(name: string) {
-    return await this.coupanModel.findOne({ name });
+    try {
+      return await this.coupanModel.findOne({ name });
+    } catch (error) {
+      return {
+        status: 400,
+        message: error,
+      };
+    }
   }
 }

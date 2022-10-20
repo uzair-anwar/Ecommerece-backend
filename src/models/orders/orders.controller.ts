@@ -16,14 +16,4 @@ export class OrdersController {
   findAll(@ID() id: string) {
     return this.ordersService.findAll(id);
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
-  }
 }

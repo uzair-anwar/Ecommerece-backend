@@ -12,6 +12,7 @@ export class ProductsService {
     private cloudinary: CloudinaryService,
     @InjectModel('Product') private readonly productModel: Model<Product>,
   ) {}
+
   async create(data: CreateProductDto, files: Express.Multer.File, id: string) {
     try {
       const urls = [];
@@ -83,7 +84,7 @@ export class ProductsService {
   async findMany(name: string) {
     try {
       return await this.productModel.find({
-        name: { $regex: '.*' + name + '.*', $options: 'i' },
+        name: { $regex: `/${name}/`, $options: 'i' },
       });
     } catch (error) {
       return {
@@ -118,7 +119,6 @@ export class ProductsService {
 
   async update(productId: string, data: UpdateProductDto, id: string) {
     try {
-      console.log(id);
       const checkProduct = await this.productModel.findOne({
         _id: productId,
         userId: id,
@@ -149,7 +149,6 @@ export class ProductsService {
 
   async remove(productId: string, userId: string) {
     try {
-      console.log(productId, userId);
       const { deletedCount } = await this.productModel.deleteOne({
         _id: productId,
         userId: userId,
