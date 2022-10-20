@@ -7,6 +7,9 @@ import { UserSchema } from './users.model';
 import { UserController } from './users.controller';
 import { CloudinaryModule } from 'src/models/Cloudinary/cloudinary.module';
 import { JwtStrategy } from './jwt.strategy';
+import { ProductsModule } from '../products/products.module';
+import { PaymentsModule } from '../payments/payments.module';
+import { OrdersModule } from '../orders/orders.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { JwtStrategy } from './jwt.strategy';
     JwtModule.register({
       secret: 'JWT_SECRET',
     }),
+    ProductsModule,
+    PaymentsModule,
+    OrdersModule,
   ],
   controllers: [UserController],
   providers: [UserService, JwtStrategy],

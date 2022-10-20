@@ -6,17 +6,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 
 @Injectable()
 export class TokenMiddleware implements NestMiddleware {
   constructor(private jwtService: JwtService) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
+  async use(req, res: Response, next: NextFunction) {
     const authorization = req.headers['authorization'];
     let bearer = '';
-
-    console.log('object');
 
     if (typeof authorization != 'undefined') {
       bearer = authorization.replace('Bearer ', '');
@@ -26,25 +24,26 @@ export class TokenMiddleware implements NestMiddleware {
       throw new UnauthorizedException('No Token provided!');
     }
 
-    const isValid = this.isTokenValid(bearer);
+    const id = await this.isTokenValid(bearer);
 
-    if (!isValid) {
+    req.id = id;
+
+    if (!id) {
       throw new UnauthorizedException('Invalid Token!');
     }
     next();
   }
 
-  isTokenValid(bearerToken: string): boolean {
+  async isTokenValid(bearerToken: string): Promise<any> {
     const verifyOptions = { secret: 'JWT_SECRET' };
-    let isValid = false;
     try {
-      const payload = this.jwtService.verifyAsync(bearerToken, verifyOptions);
-      console.log(payload, '1');
-
-      if (payload) isValid = true;
+      const payload = await this.jwtService.verifyAsync(
+        bearerToken,
+        verifyOptions,
+      );
+      return payload;
     } catch (error) {
       throw new HttpException(error, HttpStatus.UNAUTHORIZED);
     }
-    return isValid;
   }
 }
