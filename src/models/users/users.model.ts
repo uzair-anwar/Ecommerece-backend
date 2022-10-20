@@ -5,6 +5,7 @@ export const UserSchema = new mongoose.Schema({
   email: { type: String, require: true, unique: true },
   password: { type: String, require: true },
   image: { type: String },
+  stripeId: { type: String },
 });
 
 export interface User extends mongoose.Document {
@@ -13,4 +14,5 @@ export interface User extends mongoose.Document {
   email: string;
   password: string;
   image: string;
+  stripeId: string;
 }

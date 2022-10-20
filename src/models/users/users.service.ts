@@ -5,6 +5,9 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from './users.model';
 import { CloudinaryService } from 'src/models/Cloudinary/cloudinary.service';
 import { comparePassword, generateHashPassword } from './users.providers';
+import { ProductsService } from '../products/products.service';
+import { PaymentsService } from '../payments/payments.service';
+import { OrdersService } from '../orders/orders.service';
 
 @Injectable()
 export class UserService {
@@ -12,6 +15,9 @@ export class UserService {
     private cloudinary: CloudinaryService,
     @InjectModel('User') private readonly userModel: Model<User>,
     private jwtService: JwtService,
+    private readonly productsService: ProductsService,
+    private readonly paymentsService: PaymentsService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   async addUser(data: any, file: Express.Multer.File) {
@@ -25,12 +31,16 @@ export class UserService {
         return { status: 409, message: 'User already exists' };
       } else {
         const hashPassword = await generateHashPassword(data.password);
-
+        const stripeCustomer = await this.paymentsService.createCustomer(
+          data.name,
+          data.email,
+        );
         const newAccount = new this.userModel({
           name: data.name,
           email: data.email,
           password: hashPassword,
           image: url,
+          stripeId: stripeCustomer.id,
         });
 
         const result = await newAccount.save();
@@ -54,20 +64,19 @@ export class UserService {
   async login(data: any) {
     try {
       const result = await this.userModel.findOne({ email: data.email }).exec();
-      if (result) {
+      if (result != null) {
         const isMatch = await comparePassword(
           data.password,
           result.password,
         ).catch(() => {
-          throw new BadRequestException('Invalid file type.');
+          throw new BadRequestException('Error in comparison');
         });
         if (isMatch) {
-          console.log(result);
-          const access_token = this.jwtService.sign(result.email);
+          const token = this.jwtService.sign(result._id.toString());
           const user = {
             status: 200,
             result,
-            access_token,
+            token,
             message: 'Successfully Login',
           };
           return user;
@@ -82,12 +91,20 @@ export class UserService {
     }
   }
 
-  async getUser(email: string) {
-    return await this.userModel.findOne({ email }).exec();
+  async getUser(id: string) {
+    try {
+      const result = await this.userModel.findOne({ _id: id }).exec();
+      return result;
+    } catch (error) {
+      return {
+        status: 400,
+        message: error,
+      };
+    }
   }
 
-  async updatePassword(data: any) {
-    const { id, oldPassword, newPassword } = data;
+  async updatePassword(id: string, data: any) {
+    const { oldPassword, newPassword } = data;
 
     const user = await this.userModel.findOne({ id }).exec();
     comparePassword(oldPassword, user.password).then(async (response) => {
