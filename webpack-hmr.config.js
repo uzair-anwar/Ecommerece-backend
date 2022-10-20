@@ -1,7 +1,7 @@
-import nodeExternals from 'webpack-node-externals';
-import { RunScriptWebpackPlugin } from 'run-script-webpack-plugin';
+const nodeExternals = require('webpack-node-externals');
+const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin');
 
-export default function (options, webpack) {
+module.exports = function (options, webpack) {
   return {
     ...options,
     entry: ['webpack/hot/poll?100', options.entry],
@@ -22,4 +22,4 @@ export default function (options, webpack) {
       }),
     ],
   };
-}
+};
